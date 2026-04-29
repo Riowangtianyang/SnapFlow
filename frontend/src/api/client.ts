@@ -6,6 +6,17 @@ export type { Annotation, AnnotationShapeType }
 
 const baseURL = '/api'
 
+export class ApiException extends Error {
+  constructor(
+    public code: string,
+    public detail: string,
+    public status: number
+  ) {
+    super(detail)
+    this.name = 'ApiException'
+  }
+}
+
 interface RequestOptions extends RequestInit {
   params?: Record<string, string | number | boolean | undefined>
 }
@@ -16,7 +27,6 @@ async function request<T>(
 ): Promise<T> {
   const { params, ...fetchOptions } = options
 
-  // Ensure endpoint has trailing slash for backend API compatibility
   let url = `${baseURL}${endpoint}${endpoint.endsWith('/') ? '' : '/'}`
 
   if (params) {
@@ -37,17 +47,35 @@ async function request<T>(
     ...fetchOptions.headers,
   }
 
-  const response = await fetch(url, {
-    ...fetchOptions,
-    headers,
-  })
+  let response: Response
+  try {
+    response = await fetch(url, {
+      ...fetchOptions,
+      headers,
+    })
+  } catch (networkError) {
+    throw new ApiException(
+      'NETWORK_ERROR',
+      '网络连接失败，请检查网络或服务器状态',
+      0
+    )
+  }
 
   if (!response.ok) {
-    const error: ApiError = await response.json().catch(() => ({
-      detail: response.statusText,
-      code: 'INTERNAL_ERROR',
-    }))
-    throw error
+    let errorData: ApiError
+    try {
+      errorData = await response.json()
+    } catch {
+      errorData = {
+        detail: response.statusText || '请求失败',
+        code: 'INTERNAL_ERROR',
+      }
+    }
+    throw new ApiException(
+      errorData.code || 'HTTP_ERROR',
+      errorData.detail || `HTTP ${response.status}`,
+      response.status
+    )
   }
 
   if (response.status === 204) {

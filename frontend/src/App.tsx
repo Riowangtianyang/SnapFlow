@@ -1,6 +1,7 @@
 import { Routes, Route, Navigate } from 'react-router-dom'
 import WorkflowList from './components/workflow/WorkflowList'
 import WorkflowDetail from './components/workflow/WorkflowDetail'
+import SettingsPage from './components/settings/SettingsPage'
 
 function App() {
   return (
@@ -11,7 +12,7 @@ function App() {
           <nav className="flex gap-6 text-sm">
             <a href="/workflows" className="text-gray-600 hover:text-gray-900">工作流</a>
             <a href="#" className="text-gray-600 hover:text-gray-900">执行历史</a>
-            <a href="#" className="text-gray-600 hover:text-gray-900">设置</a>
+            <a href="/settings" className="text-gray-600 hover:text-gray-900">设置</a>
           </nav>
         </div>
       </header>
@@ -21,6 +22,7 @@ function App() {
           <Route path="/" element={<Navigate to="/workflows" replace />} />
           <Route path="/workflows" element={<WorkflowList />} />
           <Route path="/workflow/:id" element={<WorkflowDetail />} />
+          <Route path="/settings" element={<SettingsPage />} />
         </Routes>
       </main>
     </div>

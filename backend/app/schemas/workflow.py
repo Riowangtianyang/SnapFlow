@@ -9,6 +9,11 @@ class StepType(str, Enum):
     CLICK = "click"
     EXTRACT = "extract"
     DOWNLOAD = "download"
+    NAVIGATE = "navigate"
+    WAIT = "wait"
+    WAIT_FOR = "wait_for"
+    TYPE = "type"
+    SCREENSHOT = "screenshot"
 
 
 class AnnotationType(str, Enum):
