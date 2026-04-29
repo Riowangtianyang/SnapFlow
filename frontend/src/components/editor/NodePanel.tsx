@@ -60,9 +60,9 @@ export default function NodePanel({ onAddNode }: NodePanelProps) {
   }, []);
 
   return (
-    <aside className="w-56 border-r border-border bg-background p-4 overflow-y-auto">
-      <h3 className="text-sm font-medium text-text-primary mb-3">节点面板</h3>
-      <p className="text-xs text-text-muted mb-4">双击或拖拽到画布添加节点</p>
+    <aside className="w-56 bg-slate-800 border-r border-slate-700 p-4 overflow-y-auto">
+      <h3 className="text-sm font-medium text-white mb-3">节点面板</h3>
+      <p className="text-xs text-slate-400 mb-4">双击或拖拽到画布添加节点</p>
 
       <div className="space-y-1.5">
         {nodeTypes.map((node) => {
@@ -73,14 +73,14 @@ export default function NodePanel({ onAddNode }: NodePanelProps) {
               draggable
               onDoubleClick={() => handleDoubleClick(node.type, node.label)}
               onDragStart={(e) => handleDragStart(e, node.type, node.label, node.description)}
-              className="flex items-center gap-2.5 px-3 py-2 bg-surface rounded-lg border border-border cursor-grab hover:border-primary hover:shadow-sm transition-all active:cursor-grabbing group"
+              className="flex items-center gap-2.5 px-3 py-2 bg-slate-700 rounded-lg border border-slate-600 cursor-grab hover:border-primary hover:shadow-sm transition-all active:cursor-grabbing group"
             >
               <span className={`flex items-center justify-center w-6 h-6 rounded ${node.colorClass}`}>
                 <Icon className="w-3.5 h-3.5" />
               </span>
               <div className="flex-1 min-w-0">
-                <div className="text-sm text-text-primary font-medium">{node.label}</div>
-                <div className="text-xs text-text-muted truncate">{node.description}</div>
+                <div className="text-sm text-white font-medium">{node.label}</div>
+                <div className="text-xs text-slate-400 truncate">{node.description}</div>
               </div>
             </div>
           );
@@ -88,9 +88,9 @@ export default function NodePanel({ onAddNode }: NodePanelProps) {
       </div>
 
       {/* Node Legend */}
-      <div className="mt-6 pt-4 border-t border-border">
-        <h4 className="text-xs font-medium text-text-muted mb-2">快捷操作</h4>
-        <div className="space-y-1 text-xs text-text-muted">
+      <div className="mt-6 pt-4 border-t border-slate-700">
+        <h4 className="text-xs font-medium text-slate-400 mb-2">快捷操作</h4>
+        <div className="space-y-1 text-xs text-slate-400">
           <div>• 双击添加到画布中央</div>
           <div>• 拖拽节点到画布</div>
           <div>• 节点间连线创建流程</div>

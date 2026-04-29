@@ -2,24 +2,25 @@
 
 import { memo } from 'react'
 import { Handle, Position, type NodeProps } from 'reactflow'
+import { MousePointer, FileText, Download } from 'lucide-react'
 import type { CanvasNodeData } from '../../../stores/workflowCanvasStore'
 
-const typeConfig: Record<string, { icon: string; color: string; bgColor: string; borderColor: string }> = {
+const typeConfig: Record<string, { icon: React.ElementType; color: string; bgColor: string; borderColor: string }> = {
   click: {
-    icon: '👆',
-    color: 'text-blue-800',
+    icon: MousePointer,
+    color: 'text-blue-700',
     bgColor: 'bg-blue-50',
     borderColor: 'border-blue-400',
   },
   extract: {
-    icon: '📄',
-    color: 'text-purple-800',
+    icon: FileText,
+    color: 'text-purple-700',
     bgColor: 'bg-purple-50',
     borderColor: 'border-purple-400',
   },
   download: {
-    icon: '📥',
-    color: 'text-orange-800',
+    icon: Download,
+    color: 'text-orange-700',
     bgColor: 'bg-orange-50',
     borderColor: 'border-orange-400',
   },
@@ -33,6 +34,7 @@ const typeLabels: Record<string, string> = {
 
 const ActionNode = memo(({ data, selected }: NodeProps<CanvasNodeData>) => {
   const config = typeConfig[data.type] || typeConfig.click
+  const Icon = config.icon
 
   return (
     <div
@@ -43,8 +45,8 @@ const ActionNode = memo(({ data, selected }: NodeProps<CanvasNodeData>) => {
       } ${config.bgColor}`}
     >
       <div className="flex items-center gap-2">
-        <span className="text-lg">{config.icon}</span>
-        <span className={`font-medium ${config.color}`}>
+        <Icon className={`w-4 h-4 ${config.color}`} />
+        <span className={`font-medium text-sm ${config.color}`}>
           {typeLabels[data.type] || data.type}
         </span>
       </div>

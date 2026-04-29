@@ -65,7 +65,7 @@ export default function Canvas() {
   }, [setSelectedNode])
 
   return (
-    <div className="w-full h-full">
+    <div className="w-full h-full bg-slate-900">
       <ReactFlow
         nodes={nodes}
         edges={edges}
@@ -80,13 +80,15 @@ export default function Canvas() {
         snapToGrid
         snapGrid={[16, 16]}
         defaultViewport={{ x: 100, y: 100, zoom: 1 }}
+        className="bg-slate-900"
       >
-        <Background variant={BackgroundVariant.Dots} gap={16} size={1} />
-        <Controls />
+        <Background variant={BackgroundVariant.Dots} gap={16} size={1} className="bg-slate-900" />
+        <Controls className="!bg-slate-800 !border-slate-700" />
         <MiniMap
           nodeStrokeWidth={3}
           zoomable
           pannable
+          className="!bg-slate-800"
         />
       </ReactFlow>
     </div>
