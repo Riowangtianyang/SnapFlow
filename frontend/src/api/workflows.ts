@@ -38,3 +38,21 @@ export async function exportWorkflow(id: string): Promise<WorkflowExport> {
 export async function importWorkflow(id: string, data: WorkflowImport): Promise<Workflow> {
   return post<Workflow>(`/workflows/${id}/import`, data)
 }
+
+export interface RunWorkflowResponse {
+  execution_id: string
+  workflow_id: string
+  status: string
+  started_at: string | null
+  completed_at: string | null
+  step_results: Array<{
+    step_id: string
+    status: string
+    output: Record<string, unknown> | null
+    error: string | null
+  }>
+}
+
+export async function runWorkflow(workflowId: string): Promise<RunWorkflowResponse> {
+  return post<RunWorkflowResponse>(`/executions/run/${workflowId}`)
+}

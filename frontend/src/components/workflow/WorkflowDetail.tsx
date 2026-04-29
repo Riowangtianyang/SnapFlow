@@ -1,15 +1,21 @@
 import { useEffect, useState } from 'react'
 import { useParams, Link } from 'react-router-dom'
+import { Play, Loader2 } from 'lucide-react'
 import { useWorkflowStore } from '../../stores/workflowStore'
 import Canvas from '../editor/Canvas'
 import PropertiesPanel from '../editor/PropertiesPanel'
 import NodePanel from '../editor/NodePanel'
 import IntentEditor from './IntentEditor'
+import * as workflowsApi from '../../api/workflows'
+import { ApiException } from '../../api/client'
 
 export default function WorkflowDetail() {
   const { id } = useParams<{ id: string }>()
   const { currentWorkflow, fetchWorkflows } = useWorkflowStore()
   const [activeTab, setActiveTab] = useState<'canvas' | 'intents' | 'results'>('canvas')
+  const [running, setRunning] = useState(false)
+  const [runError, setRunError] = useState<string | null>(null)
+  const [lastExecution, setLastExecution] = useState<workflowsApi.RunWorkflowResponse | null>(null)
 
   useEffect(() => {
     if (!currentWorkflow || currentWorkflow.id !== id) {
@@ -21,6 +27,25 @@ export default function WorkflowDetail() {
       })
     }
   }, [id, currentWorkflow, fetchWorkflows])
+
+  const handleRun = async () => {
+    if (!id || running) return
+    setRunError(null)
+    setRunning(true)
+    try {
+      const result = await workflowsApi.runWorkflow(id)
+      setLastExecution(result)
+      setActiveTab('results')
+    } catch (err) {
+      if (err instanceof ApiException) {
+        setRunError(err.detail)
+      } else {
+        setRunError('运行失败')
+      }
+    } finally {
+      setRunning(false)
+    }
+  }
 
   if (!currentWorkflow) {
     return (
@@ -40,6 +65,23 @@ export default function WorkflowDetail() {
           <h1 className="text-xl font-semibold text-gray-800">{currentWorkflow.name}</h1>
         </div>
         <div className="flex gap-2">
+          <button
+            onClick={handleRun}
+            disabled={running}
+            className="flex items-center gap-2 h-[38px] px-4 bg-primary text-white rounded-[8px] text-sm font-medium hover:bg-primary-hover transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            {running ? (
+              <>
+                <Loader2 className="w-4 h-4 animate-spin" />
+                运行中...
+              </>
+            ) : (
+              <>
+                <Play className="w-4 h-4" />
+                运行
+              </>
+            )}
+          </button>
           <button
             onClick={() => setActiveTab('canvas')}
             className={`px-4 py-2 rounded-lg transition-colors ${
@@ -73,6 +115,12 @@ export default function WorkflowDetail() {
         </div>
       </div>
 
+      {runError && (
+        <div className="bg-red-50 border border-red-200 text-red-600 px-4 py-2 text-sm">
+          {runError}
+        </div>
+      )}
+
       <div className="flex-1 flex overflow-hidden">
         {activeTab === 'canvas' && (
           <>
@@ -94,9 +142,45 @@ export default function WorkflowDetail() {
         )}
         {activeTab === 'results' && (
           <div className="flex-1 overflow-y-auto p-6">
-            <div className="text-center text-gray-500">
-              运行工作流后查看结果
-            </div>
+            {lastExecution ? (
+              <div className="space-y-4">
+                <div className="flex items-center gap-3">
+                  <span className={`px-3 py-1.5 rounded-full text-xs font-medium ${
+                    lastExecution.status === 'completed' ? 'bg-success-bg text-success' :
+                    lastExecution.status === 'failed' ? 'bg-red-50 text-red-500' :
+                    'bg-primary-light text-primary'
+                  }`}>
+                    {lastExecution.status === 'completed' ? '已完成' :
+                     lastExecution.status === 'failed' ? '失败' : '运行中'}
+                  </span>
+                  <span className="text-sm text-text-muted">
+                    {lastExecution.started_at && new Date(lastExecution.started_at).toLocaleString('zh-CN')}
+                  </span>
+                </div>
+                <div className="bg-surface border border-border rounded-[10px] p-4">
+                  <h3 className="text-sm font-medium text-text-primary mb-3">步骤结果</h3>
+                  <div className="space-y-2">
+                    {lastExecution.step_results.map((sr, idx) => (
+                      <div key={sr.step_id} className="flex items-start gap-3 text-sm">
+                        <span className={`w-2 h-2 rounded-full mt-1.5 ${
+                          sr.status === 'completed' ? 'bg-success' :
+                          sr.status === 'failed' ? 'bg-red-500' : 'bg-gray-400'
+                        }`} />
+                        <div className="flex-1">
+                          <span className="text-text-primary">步骤 {idx + 1}</span>
+                          <span className="ml-2 text-text-muted">{sr.status}</span>
+                          {sr.error && <p className="text-red-500 text-xs mt-1">{sr.error}</p>}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            ) : (
+              <div className="text-center text-text-muted">
+                运行工作流后查看结果
+              </div>
+            )}
           </div>
         )}
       </div>

@@ -1,14 +1,15 @@
 // Node Panel - Draggable node palette with icons
 import { useCallback } from 'react';
+import { Play, MousePointer, Keyboard, FileText, Clock, Eye, RefreshCw, HelpCircle, Globe, Camera, Upload, Flag } from 'lucide-react';
 
 interface NodeType {
   type: string;
   label: string;
-  icon: string;
+  icon: React.ElementType;
+  colorClass: string;
   description: string;
 }
 
-// QLT-3: FlowNode type for drag and drop
 interface FlowNode {
   id: string;
   type: string;
@@ -24,18 +25,18 @@ interface NodePanelProps {
 }
 
 const nodeTypes: NodeType[] = [
-  { type: 'start', label: 'Start', icon: '🚀', description: '入口点' },
-  { type: 'click', label: 'Click', icon: '👆', description: '点击元素' },
-  { type: 'type', label: 'Type', icon: '⌨️', description: '输入文本' },
-  { type: 'extract', label: 'Extract', icon: '📥', description: '提取数据' },
-  { type: 'wait', label: 'Wait', icon: '⏱️', description: '等待秒数' },
-  { type: 'wait_for', label: 'Wait For', icon: '👀', description: '等待元素' },
-  { type: 'loop', label: 'Loop', icon: '🔄', description: '遍历列表' },
-  { type: 'condition', label: 'Condition', icon: '❓', description: '条件分支' },
-  { type: 'navigate', label: 'Navigate', icon: '🌐', description: '跳转URL' },
-  { type: 'screenshot', label: 'Screenshot', icon: '📷', description: '截图' },
-  { type: 'output', label: 'Output', icon: '📤', description: '输出数据' },
-  { type: 'end', label: 'End', icon: '🏁', description: '结束' },
+  { type: 'start', label: 'Start', icon: Play, colorClass: 'bg-green-100 text-green-700', description: '入口点' },
+  { type: 'click', label: 'Click', icon: MousePointer, colorClass: 'bg-blue-100 text-blue-700', description: '点击元素' },
+  { type: 'type', label: 'Type', icon: Keyboard, colorClass: 'bg-gray-100 text-gray-700', description: '输入文本' },
+  { type: 'extract', label: 'Extract', icon: FileText, colorClass: 'bg-purple-100 text-purple-700', description: '提取数据' },
+  { type: 'wait', label: 'Wait', icon: Clock, colorClass: 'bg-amber-100 text-amber-700', description: '等待秒数' },
+  { type: 'wait_for', label: 'Wait For', icon: Eye, colorClass: 'bg-cyan-100 text-cyan-700', description: '等待元素' },
+  { type: 'loop', label: 'Loop', icon: RefreshCw, colorClass: 'bg-indigo-100 text-indigo-700', description: '遍历列表' },
+  { type: 'condition', label: 'Condition', icon: HelpCircle, colorClass: 'bg-yellow-100 text-yellow-700', description: '条件分支' },
+  { type: 'navigate', label: 'Navigate', icon: Globe, colorClass: 'bg-sky-100 text-sky-700', description: '跳转URL' },
+  { type: 'screenshot', label: 'Screenshot', icon: Camera, colorClass: 'bg-pink-100 text-pink-700', description: '截图' },
+  { type: 'download', label: 'Download', icon: Upload, colorClass: 'bg-amber-100 text-amber-700', description: '下载数据' },
+  { type: 'end', label: 'End', icon: Flag, colorClass: 'bg-red-100 text-red-700', description: '结束' },
 ];
 
 export default function NodePanel({ onAddNode }: NodePanelProps) {
@@ -50,41 +51,46 @@ export default function NodePanel({ onAddNode }: NodePanelProps) {
     onAddNode(newNode);
   }, [onAddNode]);
 
-  const handleDragStart = useCallback((e: React.DragEvent, nodeType: string, label: string) => {
+  const handleDragStart = useCallback((e: React.DragEvent, nodeType: string, label: string, description: string) => {
     e.dataTransfer.setData('application/node', JSON.stringify({
       type: nodeType,
-      data: { label, description: nodeTypes.find((n) => n.type === nodeType)?.description },
+      data: { label, description },
     }));
     e.dataTransfer.effectAllowed = 'move';
   }, []);
 
   return (
-    <aside className="w-56 border-r border-gray-200 bg-gray-50 p-4 overflow-y-auto">
-      <h3 className="text-sm font-medium text-gray-700 mb-3">节点面板</h3>
-      <p className="text-xs text-gray-400 mb-4">双击或拖拽到画布添加节点</p>
+    <aside className="w-56 border-r border-border bg-background p-4 overflow-y-auto">
+      <h3 className="text-sm font-medium text-text-primary mb-3">节点面板</h3>
+      <p className="text-xs text-text-muted mb-4">双击或拖拽到画布添加节点</p>
 
       <div className="space-y-1.5">
-        {nodeTypes.map((node) => (
-          <div
-            key={node.type}
-            draggable
-            onDoubleClick={() => handleDoubleClick(node.type, node.label)}
-            onDragStart={(e) => handleDragStart(e, node.type, node.label)}
-            className="flex items-center gap-2.5 px-3 py-2 bg-white rounded-md border border-gray-200 cursor-grab hover:border-purple-400 hover:shadow-sm transition-all active:cursor-grabbing group"
-          >
-            <span className="text-base w-6 text-center">{node.icon}</span>
-            <div className="flex-1 min-w-0">
-              <div className="text-sm text-gray-700 font-medium">{node.label}</div>
-              <div className="text-xs text-gray-400 truncate">{node.description}</div>
+        {nodeTypes.map((node) => {
+          const Icon = node.icon;
+          return (
+            <div
+              key={node.type}
+              draggable
+              onDoubleClick={() => handleDoubleClick(node.type, node.label)}
+              onDragStart={(e) => handleDragStart(e, node.type, node.label, node.description)}
+              className="flex items-center gap-2.5 px-3 py-2 bg-surface rounded-lg border border-border cursor-grab hover:border-primary hover:shadow-sm transition-all active:cursor-grabbing group"
+            >
+              <span className={`flex items-center justify-center w-6 h-6 rounded ${node.colorClass}`}>
+                <Icon className="w-3.5 h-3.5" />
+              </span>
+              <div className="flex-1 min-w-0">
+                <div className="text-sm text-text-primary font-medium">{node.label}</div>
+                <div className="text-xs text-text-muted truncate">{node.description}</div>
+              </div>
             </div>
-          </div>
-        ))}
+          );
+        })}
       </div>
 
       {/* Node Legend */}
-      <div className="mt-6 pt-4 border-t border-gray-200">
-        <h4 className="text-xs font-medium text-gray-500 mb-2">快捷操作</h4>
-        <div className="space-y-1 text-xs text-gray-400">
+      <div className="mt-6 pt-4 border-t border-border">
+        <h4 className="text-xs font-medium text-text-muted mb-2">快捷操作</h4>
+        <div className="space-y-1 text-xs text-text-muted">
           <div>• 双击添加到画布中央</div>
           <div>• 拖拽节点到画布</div>
           <div>• 节点间连线创建流程</div>
@@ -93,4 +99,3 @@ export default function NodePanel({ onAddNode }: NodePanelProps) {
     </aside>
   );
 }
-
